@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard BI — Culture Warga, Mahasiswa &amp; Fenomena Warkop Surabaya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #EEF2F6;
+      color: #0F172A;
+    }
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 245px;
+    }
+    @media (min-width: 1024px) {
+      .chart-box {
+        height: 260px;
+      }
+    }
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 8mm;
+      }
+      body {
+        background-color: #FFFFFF !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .dash-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-lime-200 selection:text-slate-900 overflow-x-hidden">
+
+  <!-- TOP EXECUTIVE BI HEADER (Inspired by Excel Analytical Dashboard Banner) -->
+  <header class="bg-gradient-to-r from-[#5B8C2A] via-[#689F38] to-[#4D7C0F] text-white shadow-md sticky top-0 z-40 border-b-2 border-lime-300/40">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-xs border border-white/25 flex items-center justify-center text-xl shadow-xs shrink-0">
+          📊
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded bg-slate-950/30 text-lime-100">
+              Surabaya Consumer &amp; Campus BI
+            </span>
+            <span class="hidden sm:inline-block text-[11px] text-lime-100 font-medium">Sumber: BPS Kota Surabaya &amp; Susenas</span>
+          </div>
+          <h1 class="text-sm sm:text-lg font-extrabold tracking-tight leading-snug mt-0.5">
+            DASHBOARD ANALISA CULTURE WARGA, MAHASISWA &amp; FENOMENA WARKOP SURABAYA
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 no-print">
+        <button id="resetFilterBtn" type="button" class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-xs font-bold text-white border border-white/25 transition-all cursor-pointer">
+          ↺ Reset Filter
+        </button>
+        <button id="printDashBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-xs font-extrabold text-lime-300 shadow-sm transition-all cursor-pointer">
+          📄 Simpan PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN 12-COLUMN BI WORKSPACE -->
+  <div class="max-w-[1400px] mx-auto px-3 sm:px-6 py-5 space-y-6">
+
+    <!-- BI GRID: LEFT SLICERS + CENTER KPI & CHARTS + RIGHT SLICERS -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+      <!-- LEFT SLICER & HIGHLIGHT PANEL (2 Columns on Desktop) -->
+      <aside class="lg:col-span-2 space-y-3.5">
+
+        <!-- Slicer 1: Segmen Konsumen -->
+        <div class="dash-card bg-white rounded-2xl p-3.5 shadow-xs border border-slate-200/90">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">
+              Segmen Warga
+            </span>
+            <span class="text-[10px] text-slate-400 font-semibold">Slicer 1</span>
+          </div>
+          <div id="segmentSlicer" class="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
+            <button type="button" data-seg="all" class="seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-extrabold bg-[#689F38] text-white shadow-2xs transition-all cursor-pointer">
+              Semua Segmen (3,0 Jt)
+            </button>
+            <button type="button" data-seg="mahasiswa" class="seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer">
+              Mahasiswa (335 Rb)
+            </button>
+            <button type="button" data-seg="pekerja" class="seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer">
+              Pekerja Muda / Ojol
+            </button>
+            <button type="button" data-seg="keluarga" class="seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer">
+              Keluarga Lokal SBY
+            </button>
+          </div>
+        </div>
+
+        <!-- Highlight Card 1 (Green Card like Reference Image) -->
+        <div class="dash-card bg-gradient-to-br from-[#689F38] to-[#4D7C0F] text-white rounded-2xl p-3.5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-lime-100">Populasi Mahasiswa SBY</p>
+          <p class="text-2xl font-extrabold mt-1">±335.400</p>
+          <p class="text-[11px] text-lime-100 mt-1 leading-snug">
+            UNAIR, ITS, UNESA, UPN, UBAYA, Petra, UINSA &amp; PTS (BPS &amp; PDDIKTI)
+          </p>
+        </div>
+
+        <!-- Highlight Card 2 -->
+        <div class="dash-card bg-white rounded-2xl p-3.5 shadow-xs border border-slate-200/90">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Belanja Makanan Jadi</p>
+          <p class="text-xl font-extrabold text-slate-900 mt-0.5">34,8%</p>
+          <p class="text-[11px] text-slate-600 mt-1 leading-snug">
+            Dari total pengeluaran makanan warga Surabaya (Susenas BPS) — tertinggi di Jatim.
+          </p>
+        </div>
+
+        <!-- Category Contribution Mini List (Bottom-Left style from Reference Image) -->
+        <div class="dash-card bg-rose-50/90 border border-rose-200/80 rounded-2xl p-3.5 space-y-2">
+          <p class="text-[11px] font-extrabold text-rose-900">Porsi Pengeluaran Makanan</p>
+          <div class="space-y-1.5 text-[11px]">
+            <div class="flex justify-between font-semibold text-slate-700">
+              <span>Makanan &amp; Minum Jadi</span>
+              <span class="font-extrabold text-rose-700">34,8%</span>
+            </div>
+            <div class="flex justify-between font-semibold text-slate-700">
+              <span>Padi-padian &amp; Lauk</span>
+              <span class="font-bold text-slate-800">28,4%</span>
+            </div>
+            <div class="flex justify-between font-semibold text-slate-700">
+              <span>Rokok &amp; Kopi/Teh</span>
+              <span class="font-bold text-slate-800">16,2%</span>
+            </div>
+            <div class="flex justify-between font-semibold text-slate-700">
+              <span>Bahan Segar &amp; Lainnya</span>
+              <span class="font-bold text-slate-800">20,6%</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- CENTER MAIN ANALYTICAL CANVAS (8 Columns on Desktop) -->
+      <main class="lg:col-span-8 space-y-4">
+
+        <!-- TOP 3 KPI SUMMARY CARDS (Directly inspired by Reference Image) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div class="dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 text-center relative overflow-hidden">
+            <div class="absolute top-0 inset-x-0 h-1 bg-[#689F38]"></div>
+            <p class="text-xs font-bold text-slate-500">Rata-Rata Budget F&amp;B / Bulan</p>
+            <p id="kpiBudget" class="text-2xl sm:text-[26px] font-extrabold text-slate-900 mt-1">Rp1,42 Jt</p>
+            <span id="kpiBudgetSub" class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-lime-100 text-lime-800">
+              ~Rp47.300 / hari (Makan + Nongkrong)
+            </span>
+          </div>
+
+          <div class="dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 text-center relative overflow-hidden">
+            <div class="absolute top-0 inset-x-0 h-1 bg-orange-500"></div>
+            <p class="text-xs font-bold text-slate-500">Frekuensi Nongkrong &amp; Jajan</p>
+            <p id="kpiFreq" class="text-2xl sm:text-[26px] font-extrabold text-slate-900 mt-1">5,4x <span class="text-sm font-semibold text-slate-500">/minggu</span></p>
+            <span id="kpiFreqSub" class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800">
+              Puncak: 12.00 &amp; 20.00–23.30 WIB
+            </span>
+          </div>
+
+          <div class="dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 text-center relative overflow-hidden">
+            <div class="absolute top-0 inset-x-0 h-1 bg-sky-600"></div>
+            <p class="text-xs font-bold text-slate-500">Rasio Kunjungan Warkop vs Cafe</p>
+            <p id="kpiWarkopRatio" class="text-2xl sm:text-[26px] font-extrabold text-slate-900 mt-1">76% : 24%</p>
+            <span id="kpiWarkopSub" class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800">
+              3,2x lebih sering ke Warkop
+            </span>
+          </div>
+        </div>
+
+        <!-- ROW 2: WEEKLY SPENDING CYCLE (COLUMN CHART) + BUDGET ALLOCATION (DONUT CHART) -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+          <!-- Left Chart (7 Cols): Siklus Belanja Bulanan (Tanggal Muda vs Tanggal Tua) -->
+          <div class="md:col-span-7 dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <div>
+                <h2 class="text-sm font-extrabold text-slate-900">Siklus Pengeluaran Makan &amp; Nongkrong (Minggu 1–4)</h2>
+                <p class="text-[11px] text-slate-500">Efek &ldquo;Tanggal Muda vs Tanggal Tua&rdquo; terhadap rata-rata spending (Ribu Rp/hari).</p>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-extrabold shrink-0">
+                Behaviour
+              </span>
+            </div>
+            <div class="chart-box">
+              <canvas id="cycleBarChart"></canvas>
+            </div>
+            <p id="cycleInsight" class="text-[11px] text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-2 border border-slate-100">
+              <strong>Pola Mahasiswa &amp; Pekerja SBY:</strong> Minggu 1–2 (Tgl 1–14) belanja eksploratif (Rp52rb–Rp58rb/hari), turun 38% di Minggu 4 menuju menu hemat Warkop &amp; nasi sambelan.
+            </p>
+          </div>
+
+          <!-- Right Chart (5 Cols): Donut Chart Jenis Pembelian / Alokasi Uang Saku -->
+          <div class="md:col-span-5 dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 flex flex-col justify-between">
+            <div class="mb-2">
+              <h2 class="text-sm font-extrabold text-slate-900">Struktur Pengeluaran Mahasiswa</h2>
+              <p class="text-[11px] text-slate-500">Proporsi alokasi uang saku bulanan rata-rata (Rp2,35 Jt).</p>
+            </div>
+            <div class="chart-box">
+              <canvas id="studentDonutChart"></canvas>
+            </div>
+            <p class="text-[11px] text-slate-600 bg-lime-50 rounded-xl p-2.5 mt-2 border border-lime-200/60">
+              <strong>51,5% uang saku</strong> habis untuk makan harian (36,5%) dan kopi/nongkrong (15,0%).
+            </p>
+          </div>
+
+        </div>
+
+        <!-- ROW 3: UANG SAKU MAHASISWA PER KLASTER (HORIZONTAL BAR) + TREEMAP WARKOP VS COFFEE SHOP -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+          <!-- Horizontal Bar Chart (6 Cols): Rincian Uang Saku Mahasiswa Surabaya -->
+          <div class="md:col-span-6 dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 flex flex-col justify-between">
+            <div class="mb-2">
+              <h2 class="text-sm font-extrabold text-slate-900">Uang Saku Mahasiswa Surabaya per Bulan</h2>
+              <p class="text-[11px] text-slate-500">Perbandingan total uang saku vs jatah khusus F&amp;B (Juta Rp/bulan).</p>
+            </div>
+            <div class="chart-box">
+              <canvas id="allowanceBarChart"></canvas>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 mt-2 text-center text-[10px]">
+              <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200/70">
+                <p class="font-bold text-slate-500">Hemat (32%)</p>
+                <p class="font-extrabold text-slate-900">Rp1,5 Jt/bln</p>
+              </div>
+              <div class="bg-lime-50 p-1.5 rounded-lg border border-lime-200">
+                <p class="font-bold text-lime-800">Menengah (51%)</p>
+                <p class="font-extrabold text-lime-950">Rp2,5 Jt/bln</p>
+              </div>
+              <div class="bg-orange-50 p-1.5 rounded-lg border border-orange-200">
+                <p class="font-bold text-orange-800">Mapan (17%)</p>
+                <p class="font-extrabold text-orange-950">Rp4,5 Jt/bln</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual Treemap Blocks (6 Cols - Inspired by Bottom-Center Green/Coral Blocks in Reference Image) -->
+          <div class="md:col-span-6 dash-card bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h2 class="text-sm font-extrabold text-slate-900">Peta Dominasi: Warkop vs Coffee Shop</h2>
+                <p class="text-[11px] text-slate-500">Perbandingan biaya sekali duduk, frekuensi &amp; porsi pangsa pasar.</p>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-lime-100 text-lime-800 text-[10px] font-extrabold">76% Warkop</span>
+            </div>
+
+            <!-- Treemap Style Visual Grid -->
+            <div class="grid grid-cols-12 gap-2 flex-1 min-h-[210px]">
+              <!-- Warkop Dominant Block (76% Visual Area) -->
+              <div class="col-span-8 bg-gradient-to-br from-[#689F38] to-[#558B2F] text-white rounded-xl p-3.5 flex flex-col justify-between shadow-2xs">
+                <div>
+                  <span class="text-[10px] font-extrabold uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded">
+                    Warkop / Giras (76% Volume)
+                  </span>
+                  <h3 class="text-base font-extrabold mt-2 leading-tight">Rp12.000 – Rp18.000</h3>
+                  <p class="text-[11px] text-lime-100 mt-0.5">Total pengeluaran sekali nongkrong (Kopi/Es Teh Rp5rb + Mie/Nasi Rp10rb)</p>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-white/20 text-[10px]">
+                  <div>
+                    <p class="text-lime-200">Frekuensi</p>
+                    <p class="font-extrabold text-xs">4–6x / minggu</p>
+                  </div>
+                  <div>
+                    <p class="text-lime-200">Durasi Duduk</p>
+                    <p class="font-extrabold text-xs">2–4 Jam (Wi-Fi)</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coffee Shop Secondary Blocks (24% Visual Area) -->
+              <div class="col-span-4 flex flex-col gap-2">
+                <div class="flex-1 bg-gradient-to-br from-rose-500 to-orange-500 text-white rounded-xl p-2.5 flex flex-col justify-between">
+                  <span class="text-[9px] font-extrabold uppercase bg-black/20 px-1.5 py-0.5 rounded w-fit">Coffee Shop (16%)</span>
+                  <div>
+                    <p class="text-xs font-extrabold">Rp45rb–Rp80rb</p>
+                    <p class="text-[10px] text-rose-100 leading-tight mt-0.5">1–2x / minggu (Nugas / Foto)</p>
+                  </div>
+                </div>
+                <div class="flex-1 bg-slate-800 text-white rounded-xl p-2.5 flex flex-col justify-between">
+                  <span class="text-[9px] font-extrabold uppercase bg-white/15 px-1.5 py-0.5 rounded w-fit">Grab &amp; Go (8%)</span>
+                  <div>
+                    <p class="text-xs font-extrabold">Rp15rb–Rp24rb</p>
+                    <p class="text-[10px] text-slate-300 leading-tight mt-0.5">Kopi susu gerobak / booth cepat</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-2 border border-slate-100">
+              <strong>Fakta Kunci:</strong> Nongkrong 5x/minggu di Warkop hanya menghabiskan <strong>Rp300rb/bln</strong>, sedangkan di Coffee Shop bisa menembus <strong>Rp1,2 Jt/bln</strong>!
+            </p>
+          </div>
+
+        </div>
+
+      </main>
+
+      <!-- RIGHT SLICER & CULTURE PANEL (2 Columns on Desktop - Like Right Slicers in Reference Image) -->
+      <aside class="lg:col-span-2 space-y-3.5">
+
+        <!-- Slicer 2: Klaster Daya Beli / Uang Saku -->
+        <div class="dash-card bg-white rounded-2xl p-3.5 shadow-xs border border-slate-200/90">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+              Daya Beli / Saku
+            </span>
+            <span class="text-[10px] text-slate-400 font-semibold">Slicer 2</span>
+          </div>
+          <div id="tierSlicer" class="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
+            <button type="button" data-tier="all" class="tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-white transition-all cursor-pointer">
+              Semua Klaster
+            </button>
+            <button type="button" data-tier="hemat" class="tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer">
+              Hemat (&lt; Rp1,8 Jt)
+            </button>
+            <button type="button" data-tier="menengah" class="tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer">
+              Menengah (Rp2–3,2 Jt)
+            </button>
+            <button type="button" data-tier="mapan" class="tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer">
+              Mapan (&gt; Rp3,5 Jt)
+            </button>
+          </div>
+        </div>
+
+        <!-- Culture Card: 4 Karakter Warga Surabaya -->
+        <div class="dash-card bg-white rounded-2xl p-3.5 shadow-xs border border-slate-200/90 space-y-2.5">
+          <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#5B8C2A]">
+            4 Culture Makan Warga SBY
+          </p>
+          <div class="space-y-2 text-[11px]">
+            <div class="p-2 rounded-xl bg-lime-50 border border-lime-200/80">
+              <p class="font-extrabold text-slate-900">1. Prinsip &ldquo;Marem&rdquo;</p>
+              <p class="text-slate-600 mt-0.5 leading-snug">Porsi nasi &amp; lauk wajib kenyang. Anti lauk tepung tebal.</p>
+            </div>
+            <div class="p-2 rounded-xl bg-orange-50 border border-orange-200/80">
+              <p class="font-extrabold text-slate-900">2. Lidah &ldquo;Medhok&rdquo;</p>
+              <p class="text-slate-600 mt-0.5 leading-snug">Bumbu rempah pekat, gurih umami tinggi, dan sambal pedas tajam.</p>
+            </div>
+            <div class="p-2 rounded-xl bg-sky-50 border border-sky-200/80">
+              <p class="font-extrabold text-slate-900">3. Cangkrukan Guyub</p>
+              <p class="text-slate-600 mt-0.5 leading-snug">Makan sambil ngobrol berjam-jam bareng sirkel/komunitas.</p>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <p class="font-extrabold text-slate-900">4. Budaya Malam</p>
+              <p class="text-slate-600 mt-0.5 leading-snug">Trafik kuliner hidup dari pukul 20.00 hingga 02.00 dini hari.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data BPS Reference Box -->
+        <div class="dash-card bg-slate-900 text-white rounded-2xl p-3.5 shadow-xs space-y-1.5">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-lime-400">Indikator BPS Surabaya</p>
+          <div class="text-[11px] space-y-1 text-slate-300">
+            <p>• UMK SBY: <strong class="text-white">Rp5,29 Jt</strong></p>
+            <p>• Penduduk: <strong class="text-white">3,01 Jt Jiwa</strong></p>
+            <p>• Usia 15–29 Th: <strong class="text-white">24,8%</strong></p>
+            <p>• Suhu Harian: <strong class="text-amber-300">31°C–35°C</strong></p>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <!-- DEEP-DIVE SECTION: MENJAWAB PERTANYAAN WARKOP VS COFFEE SHOP DI SURABAYA -->
+    <section class="dash-card bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/90 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div class="space-y-1">
+          <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-extrabold uppercase tracking-wider">
+            Analisa Sosiologi &amp; Ekonomi Mikro Surabaya
+          </span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+            Mengapa Warkop Kecil Sangat Menjamur di Surabaya &amp; Tidak Tergantikan oleh Coffee Shop?
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 max-w-4xl">
+            Berdasarkan data pengeluaran rumah tangga BPS dan perilaku komunal masyarakat Surabaya, terdapat <strong>5 alasan struktural</strong> mengapa Warkop mendominasi hingga 76% frekuensi nongkrong harian:
+          </p>
+        </div>
+      </div>
+
+      <!-- 5 Structural Reasons Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <div class="p-4 rounded-2xl bg-lime-50/80 border border-lime-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-[#689F38] text-white font-extrabold text-sm flex items-center justify-center">1</div>
+          <h3 class="text-sm font-extrabold text-slate-900">Matematika Frekuensi (4–6x/Minggu)</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Warga &amp; mahasiswa Surabaya nongkrong <strong>hampir setiap malam</strong>. Kopi Warkop Rp5.000 x 20 hari = <strong>Rp100rb/bln</strong>, sedangkan Coffee Shop Rp30.000 x 20 hari = <strong>Rp600rb/bln</strong> (menguras 25% uang saku).
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-orange-500 text-white font-extrabold text-sm flex items-center justify-center">2</div>
+          <h3 class="text-sm font-extrabold text-slate-900">Kultur Egaliter &ldquo;Blater&rdquo; (Zero Jaim)</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Warga Surabaya suka bicara lepas, tertawa keras, pakai sandal jepit/kaos oblong, dan merokok bebas. Coffee Shop ber-AC terasa kaku, individualis, dan memiliki <em>social barrier</em>.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-sky-50/80 border border-sky-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-sky-600 text-white font-extrabold text-sm flex items-center justify-center">3</div>
+          <h3 class="text-sm font-extrabold text-slate-900">Iklim Panas 34°C &amp; Konsep Open-Air</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Suhu kota yang terik membuat warga mencari <strong>es teh/es kopi gelas jumbo</strong> yang cepat menghilangkan dahaga di ruang terbuka berangin malam, bukan sekadar menikmati <em>latte art</em>.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 font-extrabold text-sm flex items-center justify-center">4</div>
+          <h3 class="text-sm font-extrabold text-slate-900">One-Stop Kenyang + Wi-Fi 24 Jam</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Warkop Surabaya menjual <strong>makanan mengenyangkan</strong> (Indomie telur, nasi bungkus, gorengan hangat) + Wi-Fi kencang + colokan listrik + parkir mudah di depan mata.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-rose-600 text-white font-extrabold text-sm flex items-center justify-center">5</div>
+          <h3 class="text-sm font-extrabold text-slate-900">Fungsi Sosial &ldquo;Ruang Tamu Warga&rdquo;</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Bagi mahasiswa kos dan pekerja perantau di kamar sempit, Warkop adalah <strong>ruang tamu kedua</strong> untuk mabar game, diskusi tugas, hingga mencari relasi kerja lintas profesi.
+          </p>
+        </div>
+      </div>
+
+      <!-- STRATEGIC CONCLUSION BANNER FOR BUSINESS OWNERS -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-5 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-lime-400/20 border border-lime-400/30 text-lime-300 text-[11px] font-bold">
+            ★ Kesimpulan Strategis Untuk Bisnis Anda di Surabaya
+          </div>
+          <h3 class="text-lg sm:text-xl font-extrabold text-white">
+            Jangan Buat Coffee Shop Mahal, Tapi Buatlah &ldquo;Warkop Naik Kelas / Kopitiam Rakyat&rdquo;
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Gabungkan <strong>jiwa Warkop</strong> (harga minuman Rp8.000–Rp15.000, area semi-outdoor bebas merokok + kipas besar, Wi-Fi kencang, jam buka panjang, parkir mudah) dengan <strong>kualitas &amp; kebersihan kafe</strong> serta <strong>makanan pedas-gurih mengenyangkan (Rp16.000–Rp25.000)</strong>. Model ini menangkap frekuensi kunjungan harian warga Surabaya sekaligus menjaga margin kotor tetap sehat di atas 60%!
+          </p>
+        </div>
+
+        <div class="w-full lg:w-auto shrink-0 bg-white/10 backdrop-blur-xs border border-white/15 rounded-2xl p-4 space-y-2 text-xs">
+          <p class="font-extrabold text-lime-300 uppercase tracking-wider text-[10px]">Sweet Spot Harga Hybrid</p>
+          <div class="flex justify-between gap-6">
+            <span class="text-slate-300">Kopi / Es Teh Jumbo:</span>
+            <span class="font-extrabold text-white">Rp8rb – Rp15rb</span>
+          </div>
+          <div class="flex justify-between gap-6">
+            <span class="text-slate-300">Nasi Sambel / Mie Pedas:</span>
+            <span class="font-extrabold text-white">Rp16rb – Rp25rb</span>
+          </div>
+          <div class="flex justify-between gap-6 pt-1.5 border-t border-white/15">
+            <span class="text-lime-300 font-bold">Target Repeat Order:</span>
+            <span class="font-extrabold text-lime-300">3–4x / Minggu</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEW SECTION 1: PEMETAAN LOKASI STRATEGIS (MAHASISWA VS KELUARGA, PENDAPATAN & RASIO POPULASI) -->
+    <section class="dash-card bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/90 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div class="space-y-1">
+          <span class="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 text-[11px] font-extrabold uppercase tracking-wider">
+            Spatial Intelligence • BPS Kota Surabaya &amp; PDDIKTI
+          </span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+            Pemetaan Lokasi Strategis: Segmen Mahasiswa vs Keluarga &amp; Pendapatan Wilayah
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 max-w-4xl">
+            Pilih fokus target pasar di bawah untuk melihat titik lokasi terbaik, estimasi pendapatan rumah tangga, serta perbandingan jumlah <strong>Mahasiswa Aktif (335.400)</strong> vs <strong>Warga Tetap (3,01 Juta)</strong> di tiap kawasan.
+          </p>
+        </div>
+
+        <!-- Target Segment Switcher -->
+        <div id="locTargetTabs" class="flex flex-wrap gap-1.5 shrink-0 no-print">
+          <button type="button" data-loctarget="all" class="loc-target-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-white shadow-xs transition-all cursor-pointer">
+            Semua Kawasan
+          </button>
+          <button type="button" data-loctarget="mahasiswa" class="loc-target-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-lime-100 text-lime-900 hover:bg-lime-200 transition-all cursor-pointer">
+            🎓 Target Mahasiswa
+          </button>
+          <button type="button" data-loctarget="keluarga" class="loc-target-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-100 text-amber-900 hover:bg-amber-200 transition-all cursor-pointer">
+            👨‍👩‍👧‍👦 Target Keluarga &amp; Warga
+          </button>
+        </div>
+      </div>
+
+      <!-- TWO-COLUMN COMPARISON: STRATEGIS MAHASISWA VS STRATEGIS KELUARGA -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Card Target Mahasiswa -->
+        <div id="cardTargetMahasiswa" class="rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-lime-50 to-emerald-50/70 border-2 border-lime-400/80 space-y-3 transition-all">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-[#689F38] text-white text-[11px] font-extrabold">
+              🎓 JIKA TARGET: SEGMEN MAHASISWA
+            </span>
+            <span class="text-xs font-extrabold text-lime-900">Kunci: Volume &amp; Kos Padat</span>
+          </div>
+          <p class="text-xs text-slate-700 leading-relaxed">
+            Wajib berada di <strong>radius &lt;1,5 km dari gerbang kampus &amp; zona kos-kosan</strong> dengan akses jalan motor mudah, buka hingga tengah malam, dan harga <em>entry-level</em> Rp12rb–Rp22rb.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="bg-white p-3 rounded-xl border border-lime-200">
+              <p class="font-extrabold text-slate-900">1. Klaster Timur (Mulyorejo–Sukolilo)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">UNAIR, ITS, MERR, Gebang, Keputih. <strong>115.000 mhs</strong> (35% dari populasi sekitar).</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-lime-200">
+              <p class="font-extrabold text-slate-900">2. Klaster Selatan (Ketintang–Wonocolo)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">UNESA Ketintang, Telkom, UINSA, Siwalankerto (Petra). <strong>98.000 mhs</strong>.</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-lime-200">
+              <p class="font-extrabold text-slate-900">3. Klaster Rungkut–Tenggilis</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">UPN Veteran, UBAYA, kawasan industri SIER. <strong>55.000 mhs</strong> + pekerja pabrik.</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-lime-200">
+              <p class="font-extrabold text-slate-900">4. Klaster Barat (Lidah Wetan)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">UNESA Lidah &amp; Univ. Ciputra. <strong>38.000 mhs</strong> dengan daya beli lebih tinggi.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Target Keluarga & Warga Surabaya -->
+        <div id="cardTargetKeluarga" class="rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-amber-50 to-orange-50/70 border-2 border-amber-400/80 space-y-3 transition-all">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-orange-600 text-white text-[11px] font-extrabold">
+              👨‍👩‍👧‍👦 JIKA TARGET: KELUARGA &amp; WARGA SBY
+            </span>
+            <span class="text-xs font-extrabold text-orange-900">Kunci: Parkir &amp; Rasa Medhok</span>
+          </div>
+          <p class="text-xs text-slate-700 leading-relaxed">
+            Wajib berada di <strong>jalan protokol perumahan padat (lebar jalan &ge;8m)</strong> dengan <strong>parkir mobil/motor mudah</strong>, ruangan sejuk, meja keluarga (4–6 kursi), dan paket lauk porsi besar.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="bg-white p-3 rounded-xl border border-amber-200">
+              <p class="font-extrabold text-slate-900">1. SBY Barat (Citraland–HR Muhammad)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">Wiyung, Dukuh Pakis, Pakuwon. Pendapatan keluarga <strong>Rp14–28 Jt+/bln</strong>.</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-amber-200">
+              <p class="font-extrabold text-slate-900">2. SBY Timur Residensial (Dharmahusada)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">Kertajaya, Klampis, Rungkut Madya. Pendapatan keluarga <strong>Rp9–16 Jt/bln</strong>.</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-amber-200">
+              <p class="font-extrabold text-slate-900">3. SBY Pusat (Darmo–Tegalsari)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">Tunjungan, Embong Malang, Gubeng. Wisata kuliner keluarga &amp; pekerja kantor.</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-amber-200">
+              <p class="font-extrabold text-slate-900">4. SBY Selatan (Gayungsari–Jemursari)</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">Pagesangan, Jambangan, Ahmad Yani. Perumahan mapan &amp; PNS/BUMN.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE REGIONAL MAP + POPULATION & INCOME CHART -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+        <!-- Interactive SVG Map & Selected District Inspector (6 Cols) -->
+        <div class="lg:col-span-6 bg-slate-900 text-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-lime-400">Peta Interaktif Daya Beli &amp; Demografi</p>
+              <h3 class="text-base font-extrabold">Klik Klaster Daerah di Peta Surabaya</h3>
+            </div>
+            <span class="text-[11px] bg-white/10 px-2.5 py-1 rounded-lg text-slate-300">5 Zona Utama</span>
+          </div>
+
+          <!-- SVG Map of Surabaya Regions -->
+          <svg viewBox="0 0 400 230" class="w-full h-auto rounded-xl bg-slate-950 border border-slate-800 select-none" role="img" aria-label="Peta Pendapatan dan Rasio Mahasiswa Surabaya">
+            <defs>
+              <radialGradient id="glowLime" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#84cc16" stop-opacity="0.75" />
+                <stop offset="100%" stop-color="#84cc16" stop-opacity="0" />
+              </radialGradient>
+              <radialGradient id="glowAmber" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.75" />
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
+              </radialGradient>
+              <radialGradient id="glowSky" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.65" />
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+
+            <text x="305" y="24" fill="#475569" font-size="8" font-weight="700" letter-spacing="1">SELAT MADURA</text>
+
+            <!-- City Shape -->
+            <path d="M 25,80 L 95,68 L 152,54 L 190,32 L 242,36 L 298,54 L 330,98 L 338,160 L 315,204 L 215,216 L 145,206 L 78,186 L 30,146 Z"
+                  fill="#1e293b" stroke="#334155" stroke-width="1.3" />
+
+            <!-- Arterial Roads -->
+            <path d="M 52,120 Q 125,112 202,114" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-opacity="0.75" />
+            <path d="M 204,50 L 202,114 L 200,210" fill="none" stroke="#f97316" stroke-width="2.4" stroke-opacity="0.8" />
+            <path d="M 284,56 L 292,135 L 290,196" fill="none" stroke="#84cc16" stroke-width="2.4" stroke-opacity="0.85" />
+
+            <!-- Pin 1: Surabaya Barat -->
+            <g class="region-pin cursor-pointer" data-region="barat">
+              <circle cx="88" cy="116" r="28" fill="url(#glowAmber)" />
+              <circle cx="88" cy="116" r="6.5" fill="#f59e0b" stroke="#fff" stroke-width="1.5" />
+              <rect x="30" y="76" width="116" height="26" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1.1" />
+              <text x="88" y="87" text-anchor="middle" fill="#fbbf24" font-size="7.8" font-weight="800">SBY BARAT (Keluarga)</text>
+              <text x="88" y="97" text-anchor="middle" fill="#e2e8f0" font-size="6.5">Inc: Rp14–28Jt • Mhs 14%</text>
+            </g>
+
+            <!-- Pin 2: Surabaya Timur (Kampus & Residensial) -->
+            <g class="region-pin cursor-pointer" data-region="timur">
+              <circle cx="290" cy="118" r="32" fill="url(#glowLime)" />
+              <circle cx="290" cy="118" r="7.5" fill="#84cc16" stroke="#fff" stroke-width="1.8" />
+              <rect x="225" y="127" width="128" height="26" rx="6" fill="#1a2e05" stroke="#a3e635" stroke-width="1.2" />
+              <text x="289" y="138" text-anchor="middle" fill="#bef264" font-size="7.8" font-weight="800">★ SBY TIMUR (Kampus)</text>
+              <text x="289" y="148" text-anchor="middle" fill="#ecfccb" font-size="6.5">Inc: Rp9–16Jt • Mhs 35%</text>
+            </g>
+
+            <!-- Pin 3: Surabaya Selatan (Ketintang, Gayungsari, Rungkut) -->
+            <g class="region-pin cursor-pointer" data-region="selatan">
+              <circle cx="202" cy="172" r="28" fill="url(#glowLime)" />
+              <circle cx="202" cy="172" r="6.5" fill="#22c55e" stroke="#fff" stroke-width="1.5" />
+              <rect x="140" y="181" width="124" height="26" rx="6" fill="#0f172a" stroke="#4ade80" stroke-width="1.1" />
+              <text x="202" y="192" text-anchor="middle" fill="#86efac" font-size="7.6" font-weight="800">SBY SELATAN (Hybrid)</text>
+              <text x="202" y="202" text-anchor="middle" fill="#e2e8f0" font-size="6.5">Inc: Rp8,5–15Jt • Mhs 37%</text>
+            </g>
+
+            <!-- Pin 4: Surabaya Pusat -->
+            <g class="region-pin cursor-pointer" data-region="pusat">
+              <circle cx="202" cy="106" r="24" fill="url(#glowAmber)" />
+              <circle cx="202" cy="106" r="6" fill="#fb923c" stroke="#fff" stroke-width="1.5" />
+              <rect x="148" y="70" width="108" height="24" rx="6" fill="#0f172a" stroke="#fb923c" stroke-width="1" />
+              <text x="202" y="80" text-anchor="middle" fill="#fdba74" font-size="7.5" font-weight="800">SBY PUSAT (Bisnis)</text>
+              <text x="202" y="90" text-anchor="middle" fill="#e2e8f0" font-size="6.3">Inc: Rp10–18Jt • Mhs 9%</text>
+            </g>
+
+            <!-- Pin 5: Surabaya Utara -->
+            <g class="region-pin cursor-pointer" data-region="utara">
+              <circle cx="206" cy="48" r="20" fill="url(#glowSky)" />
+              <circle cx="206" cy="48" r="5.5" fill="#38bdf8" stroke="#fff" stroke-width="1.4" />
+              <rect x="155" y="26" width="102" height="17" rx="5" fill="#0f172a" stroke="#38bdf8" stroke-width="0.9" />
+              <text x="206" y="37" text-anchor="middle" fill="#7dd3fc" font-size="7" font-weight="700">SBY UTARA • Inc Rp6,5–10Jt</text>
+            </g>
+          </svg>
+
+          <!-- Selected Region Dynamic Inspector Box -->
+          <div id="regionInspector" class="bg-slate-800/90 border border-slate-700 rounded-xl p-3.5 space-y-2.5 text-xs">
+            <div class="flex items-center justify-between gap-2 border-b border-slate-700 pb-2">
+              <div>
+                <span id="regBadge" class="text-[10px] font-bold uppercase text-lime-400">Klaster #1 • Kepadatan Mahasiswa &amp; Keluarga Muda</span>
+                <h4 id="regTitle" class="text-sm font-extrabold text-white">Surabaya Timur (Mulyorejo, Sukolilo, Rungkut, Gubeng)</h4>
+              </div>
+              <span id="regFit" class="px-2.5 py-1 rounded-lg bg-lime-500/20 text-lime-300 font-extrabold text-[11px] shrink-0">
+                Cocok: Mahasiswa &amp; Keluarga
+              </span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-slate-900/90 p-2 rounded-lg">
+                <p class="text-[10px] text-slate-400">Pendapatan Keluarga</p>
+                <p id="regIncome" class="font-extrabold text-amber-300 mt-0.5">Rp9–16 Jt/bln</p>
+              </div>
+              <div class="bg-slate-900/90 p-2 rounded-lg">
+                <p class="text-[10px] text-slate-400">Warga vs Mahasiswa</p>
+                <p id="regPopRatio" class="font-extrabold text-white mt-0.5">315rb vs 170rb</p>
+              </div>
+              <div class="bg-slate-900/90 p-2 rounded-lg">
+                <p class="text-[10px] text-slate-400">Porsi Mahasiswa</p>
+                <p id="regMhsPct" class="font-extrabold text-lime-400 mt-0.5">35,1% Populasi</p>
+              </div>
+            </div>
+            <p id="regAdvice" class="text-[11px] text-slate-300 leading-relaxed">
+              <strong>Strategi Titik:</strong> Koridor MERR, Dharmahusada &amp; Rungkut Madya menangkap 2 pasar sekaligus: mahasiswa siang-malam dan keluarga muda residensial.
+            </p>
+          </div>
+        </div>
+
+        <!-- Population & Income Comparative Chart + Data Table (6 Cols) -->
+        <div class="lg:col-span-6 bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200/80 flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Perbandingan Jumlah Warga Tetap vs Mahasiswa Aktif (Ribu Jiwa)</h3>
+            <p class="text-xs text-slate-500">Total populasi Surabaya ~3,01 Juta jiwa &amp; ~335.400 mahasiswa aktif di 5 klaster strategis.</p>
+          </div>
+
+          <div class="chart-box">
+            <canvas id="regionPopChart"></canvas>
+          </div>
+
+          <!-- Compact Reference Table: Pendapatan & Rasio -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+            <table class="w-full text-left border-collapse text-[11px]">
+              <thead>
+                <tr class="bg-slate-900 text-white">
+                  <th class="py-2 px-2.5 font-bold">Klaster Strategis</th>
+                  <th class="py-2 px-2.5 font-bold">Pendapatan / Bln</th>
+                  <th class="py-2 px-2.5 font-bold">Warga vs Mhs</th>
+                  <th class="py-2 px-2.5 font-bold">Target Utama</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tr class="bg-lime-50/60">
+                  <td class="py-2 px-2.5 font-extrabold text-slate-900">SBY Timur (MERR, Sukolilo, Rungkut)</td>
+                  <td class="py-2 px-2.5 font-bold text-emerald-700">Rp9,0 – 16,0 Jt</td>
+                  <td class="py-2 px-2.5">315rb vs <strong>170rb</strong> (35%)</td>
+                  <td class="py-2 px-2.5 font-semibold">Mahasiswa &amp; Keluarga</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-extrabold text-slate-900">SBY Selatan (Ketintang, Gayungan, Wonocolo)</td>
+                  <td class="py-2 px-2.5 font-bold text-emerald-700">Rp8,5 – 15,0 Jt</td>
+                  <td class="py-2 px-2.5">165rb vs <strong>98rb</strong> (37%)</td>
+                  <td class="py-2 px-2.5 font-semibold">Mahasiswa &amp; Kantor</td>
+                </tr>
+                <tr class="bg-amber-50/60">
+                  <td class="py-2 px-2.5 font-extrabold text-slate-900">SBY Barat (Citraland, Dukuh Pakis, Wiyung)</td>
+                  <td class="py-2 px-2.5 font-bold text-amber-800">Rp14,0 – 28,0 Jt+</td>
+                  <td class="py-2 px-2.5">225rb vs <strong>38rb</strong> (14%)</td>
+                  <td class="py-2 px-2.5 font-semibold">Keluarga Mapan</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-extrabold text-slate-900">SBY Pusat (Tunjungan, Darmo, Tegalsari)</td>
+                  <td class="py-2 px-2.5 font-bold text-slate-800">Rp10,0 – 18,0 Jt</td>
+                  <td class="py-2 px-2.5">285rb vs <strong>20rb</strong> (7%)</td>
+                  <td class="py-2 px-2.5 font-semibold">Keluarga &amp; Wisatawan</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-2.5 font-extrabold text-slate-900">SBY Utara (Perak, Kenjeran, Kapasan)</td>
+                  <td class="py-2 px-2.5 font-bold text-slate-600">Rp6,5 – 10,5 Jt</td>
+                  <td class="py-2 px-2.5">290rb vs <strong>9,4rb</strong> (3%)</td>
+                  <td class="py-2 px-2.5 font-semibold">Warga Lokal &amp; Grosir</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- NEW SECTION 2: KONSEP PEMENANG AGAR WARGA SURABAYA PASTI MEMILIH PRODUK ANDA -->
+    <section class="dash-card bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/90 space-y-6">
+      <div class="border-b border-slate-100 pb-4 space-y-1">
+        <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-extrabold uppercase tracking-wider">
+          4-Pillar Winning Product &amp; Outlet Formula
+        </span>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+          Konsep Wajib Agar Warga Surabaya PASTI Memilih Produk Anda
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 max-w-4xl">
+          Produk kuliner di Surabaya tidak cukup hanya enak. Agar menjadi pilihan utama dan menciptakan <em>repeat order</em> tinggi, konsep bisnis harus mengunci <strong>4 pilar utama</strong> yang memengaruhi keputusan beli warga Surabaya:
+        </p>
+      </div>
+
+      <!-- 4 Pillars Grid (Culture, Behaviour, Daya Beli, Kenyamanan) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Pilar 1: Culture -->
+        <div class="rounded-2xl p-4 bg-lime-50/90 border border-lime-200 flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-md bg-[#689F38] text-white text-[10px] font-extrabold">PILAR 1 • CULTURE</span>
+              <span class="text-lg">🔥</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Rasa &ldquo;Medhok&rdquo; &amp; Porsi &ldquo;Marem&rdquo;</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Warga Surabaya blak-blakan: jika bumbu tanggung atau porsi kecil, mereka langsung mencoret tempat tersebut.
+            </p>
+          </div>
+          <ul class="space-y-1.5 text-[11px] text-slate-800 bg-white p-3 rounded-xl border border-lime-200/80">
+            <li>✓ <strong>Nasi pulen 200gr</strong> + lauk potongan utuh (bukan tepung tebal).</li>
+            <li>✓ <strong>Bumbu rempah sangrai pekat</strong> + 3 sambal pedas gratis tambah (<em>dine-in</em>).</li>
+          </ul>
+        </div>
+
+        <!-- Pilar 2: Behaviour -->
+        <div class="rounded-2xl p-4 bg-orange-50/90 border border-orange-200 flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-md bg-orange-600 text-white text-[10px] font-extrabold">PILAR 2 • BEHAVIOUR</span>
+              <span class="text-lg">⚡</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Cepat Saji Siang + Cangkruk Malam</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Siang hari butuh makan cepat (&lt;5 menit) saat istirahat kerja/kuliah; malam hari suka duduk lama bersama teman/keluarga.
+            </p>
+          </div>
+          <ul class="space-y-1.5 text-[11px] text-slate-800 bg-white p-3 rounded-xl border border-orange-200/80">
+            <li>✓ <strong>Sistem Pre-Cooked Lauk:</strong> Waktu saji maksimal 3–4 menit.</li>
+            <li>✓ <strong>Buka s/d 23.30 WIB</strong> + paket <em>Sharing Bancakan</em> ber-4.</li>
+          </ul>
+        </div>
+
+        <!-- Pilar 3: Daya Beli -->
+        <div class="rounded-2xl p-4 bg-sky-50/90 border border-sky-200 flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-md bg-sky-600 text-white text-[10px] font-extrabold">PILAR 3 • DAYA BELI</span>
+              <span class="text-lg">💳</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Arsitektur Harga Bertingkat (3 Tier)</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Menangkap mahasiswa di tanggal tua sekaligus keluarga di akhir pekan dalam satu daftar menu cerdas.
+            </p>
+          </div>
+          <ul class="space-y-1.5 text-[11px] text-slate-800 bg-white p-3 rounded-xl border border-sky-200/80">
+            <li>✓ <strong>Menu Hemat (Rp14rb–Rp16rb):</strong> Penarik trafik harian mahasiswa.</li>
+            <li>✓ <strong>Menu Spesialis (Rp24rb–Rp32rb)</strong> &amp; <strong>Paket Keluarga (Rp75rb)</strong>.</li>
+          </ul>
+        </div>
+
+        <!-- Pilar 4: Kenyamanan -->
+        <div class="rounded-2xl p-4 bg-amber-50/90 border border-amber-200 flex flex-col justify-between space-y-3">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-md bg-amber-600 text-white text-[10px] font-extrabold">PILAR 4 • KENYAMANAN</span>
+              <span class="text-lg">❄️</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Anti-Gerah 34°C &amp; Parkir Mudah</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Dua alasan utama keluarga dan anak muda Surabaya batal mampir: tempat panas pengap dan tukang parkir/lahan parkir sempit.
+            </p>
+          </div>
+          <ul class="space-y-1.5 text-[11px] text-slate-800 bg-white p-3 rounded-xl border border-amber-200/80">
+            <li>✓ <strong>Ruang AC + Semi-Outdoor</strong> (bebas merokok) &amp; minuman es jumbo.</li>
+            <li>✓ <strong>Parkir motor/mobil luas &amp; gratis</strong> + Wi-Fi kencang &amp; colokan.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- FINAL EXECUTABLE CONCEPT BLUEPRINT -->
+      <div class="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+        <div class="lg:col-span-8 space-y-2">
+          <span class="inline-block px-2.5 py-0.5 rounded-full bg-lime-400/20 text-lime-300 text-[11px] font-extrabold">
+            ★ Rekomendasi Konsep Final Siap Eksekusi
+          </span>
+          <h3 class="text-lg sm:text-xl font-extrabold">
+            &ldquo;Kedai Sambelan &amp; Kopitiam Rakyat Modern&rdquo; (Konsep Hybrid 2 Gelombang)
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <strong>Gelombang 1 (10.00–19.00):</strong> Fokus pada <strong>Nasi Lauk Rempah &amp; Sambelan Spesialis</strong> (Ayam Bumbu Hitam, Cumi Pedas, Paru Rempah) untuk makan siang pekerja, mahasiswa, dan makan malam keluarga. <br class="hidden sm:inline" />
+            <strong>Gelombang 2 (19.00–24.00):</strong> Bertransformasi menjadi <strong>Warkop Modern / Cangkrukan Sejuk</strong> dengan menu minuman es jumbo (Rp8rb–Rp15rb), mie pedas, dan camilan hangat sehingga sewa tempat bekerja maksimal 14 jam sehari!
+          </p>
+        </div>
+
+        <div class="lg:col-span-4 bg-white/10 border border-white/15 rounded-2xl p-4 space-y-2 text-xs">
+          <p class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">Checklist Wajib Sebelum Buka</p>
+          <p class="text-slate-200">✅ Parkir muat minimal 15 motor &amp; 3–4 mobil</p>
+          <p class="text-slate-200">✅ Ada zona AC (keluarga) &amp; semi-outdoor (perokok)</p>
+          <p class="text-slate-200">✅ Harga masuk mulai Rp14.000 (ramah mahasiswa)</p>
+          <p class="text-slate-200">✅ Minuman dingin cup XL 22oz (margin 65%+)</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="dashToast" class="no-print hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl border border-slate-700">
+    Filter dashboard diperbarui!
+  </div>
+
+  <script>
+    (function () {
+      try {
+        // Dataset matrix for interactive slicers (Segment x Allowance Tier)
+        const dashboardProfiles = {
+          'all-all': {
+            budget: 'Rp1,42 Jt',
+            budgetSub: '~Rp47.300 / hari (Makan + Nongkrong)',
+            freq: '5,4x',
+            freqSub: 'Puncak: 12.00 & 20.00–23.30 WIB',
+            ratio: '76% : 24%',
+            ratioSub: '3,2x lebih sering ke Warkop',
+            cycleData: [56, 52, 43, 36],
+            cycleNote: 'Pola Gabungan Warga & Mahasiswa SBY: Minggu 1–2 belanja eksploratif (Rp52rb–Rp56rb/hari), turun 35% di Minggu 4 ke menu hemat Warkop & nasi sambelan.',
+            donutData: [36.5, 15.0, 22.0, 14.5, 12.0]
+          },
+          'mahasiswa-all': {
+            budget: 'Rp1,21 Jt',
+            budgetSub: '51,5% dari rata-rata uang saku Rp2,35 Jt',
+            freq: '5,8x',
+            freqSub: 'Nongkrong & nugas malam (19.00–01.00)',
+            ratio: '82% : 18%',
+            ratioSub: 'Mayoritas pilih Warkop Wi-Fi & Es Teh Jumbo',
+            cycleData: [52, 45, 36, 26],
+            cycleNote: 'Efek Tanggal Tua Mahasiswa sangat tajam: Minggu 1 (Rp52rb/hari) turun 50% menjadi Rp26rb/hari di Minggu 4 (Indomie telur + Es Teh Warkop).',
+            donutData: [36.5, 15.0, 24.0, 12.5, 12.0]
+          },
+          'pekerja-all': {
+            budget: 'Rp1,78 Jt',
+            budgetSub: '33,6% dari UMK Surabaya Rp5,29 Jt',
+            freq: '5,1x',
+            freqSub: 'Makan siang cepat + Cangkruk pulang kerja',
+            ratio: '74% : 26%',
+            ratioSub: 'Warkop untuk cangkruk harian, Cafe di akhir pekan',
+            cycleData: [68, 63, 55, 48],
+            cycleNote: 'Pekerja Muda & Komuter punya daya beli lebih stabil, namun tetap sensitif terhadap kecepatan saji makan siang dan harga kopi harian.',
+            donutData: [39.0, 16.5, 18.0, 15.5, 11.0]
+          },
+          'keluarga-all': {
+            budget: 'Rp2,45 Jt',
+            budgetSub: 'Pengeluaran makanan jadi rumah tangga (BPS)',
+            freq: '3,8x',
+            freqSub: 'Kuliner malam & makan bersama akhir pekan',
+            ratio: '65% : 35%',
+            ratioSub: 'Mengutamakan porsi marem, parkir & kebersihan',
+            cycleData: [88, 84, 78, 72],
+            cycleNote: 'Keluarga lokal Surabaya membeli lauk matang/kuliner malam secara konsisten sepanjang bulan dengan syarat porsi besar dan bumbu medhok.',
+            donutData: [44.0, 11.0, 20.0, 15.0, 10.0]
+          },
+          'hemat': {
+            budget: 'Rp820 Rb',
+            budgetSub: 'Uang saku < Rp1,8 Jt/bln (~Rp27.300/hari)',
+            freq: '6,1x',
+            freqSub: 'Sangat sensitif harga (Rp8rb–Rp14rb/porsi)',
+            ratio: '91% : 9%',
+            ratioSub: 'Hampir 100% mengandalkan Warkop & Warung',
+            cycleData: [34, 30, 25, 19],
+            cycleNote: 'Klaster Hemat memaksimalkan Warkop 24 jam dengan Wi-Fi gratis dan nasi sambelan Rp10rb–Rp13rb agar uang saku cukup hingga akhir bulan.',
+            donutData: [41.0, 13.0, 26.0, 11.0, 9.0]
+          },
+          'menengah': {
+            budget: 'Rp1,32 Jt',
+            budgetSub: 'Uang saku Rp2–3,2 Jt/bln (~Rp44.000/hari)',
+            freq: '5,5x',
+            freqSub: 'Mix Warkop harian + Cafe/delivery 1–2x/mgg',
+            ratio: '76% : 24%',
+            ratioSub: 'Target utama konsep Hybrid Warkop Modern',
+            cycleData: [54, 48, 40, 32],
+            cycleNote: 'Klaster Menengah (51% populasi mahasiswa) adalah pasar paling gemuk: mencari tempat bersih, estetik ringan, tapi harga tetap ramah kantong.',
+            donutData: [36.5, 15.5, 22.0, 14.0, 12.0]
+          },
+          'mapan': {
+            budget: 'Rp2,35 Jt',
+            budgetSub: 'Uang saku > Rp3,5 Jt/bln (~Rp78.000/hari)',
+            freq: '4,8x',
+            freqSub: 'Aktif di Surabaya Barat & Timur (MERR/Kertajaya)',
+            ratio: '46% : 54%',
+            ratioSub: 'Lebih sering ke Coffee Shop & Casual Dining',
+            cycleData: [86, 82, 76, 70],
+            cycleNote: 'Klaster Mapan tetap menyukai kuliner pedas-gurih khas Surabaya, namun menuntut ruangan ber-AC nyaman dan standar visual modern.',
+            donutData: [33.0, 21.0, 18.0, 16.0, 12.0]
+          }
+        };
+
+        let activeSeg = 'all';
+        let activeTier = 'all';
+
+        const toastEl = document.getElementById('dashToast');
+        function showToast(msg) {
+          if (!toastEl) return;
+          toastEl.textContent = msg;
+          toastEl.classList.remove('hidden');
+          clearTimeout(window.__biToast);
+          window.__biToast = setTimeout(() => toastEl.classList.add('hidden'), 2200);
+        }
+
+        // Chart 1: Weekly Spending Cycle (Coral & Lime Green Column Chart like Reference Image)
+        const cycleCtx = document.getElementById('cycleBarChart').getContext('2d');
+        const cycleBarChart = new Chart(cycleCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Minggu 1 (Tgl 1–7)', 'Minggu 2 (Tgl 8–14)', 'Minggu 3 (Tgl 15–21)', 'Minggu 4 (Tgl 22–30)'],
+            datasets: [
+              {
+                label: 'Makan Berat (Ribu Rp/hari)',
+                data: [38, 36, 30, 26],
+                backgroundColor: '#EF5350',
+                borderRadius: 6,
+                barPercentage: 0.65
+              },
+              {
+                label: 'Kopi & Nongkrong (Ribu Rp/hari)',
+                data: [18, 16, 13, 10],
+                backgroundColor: '#689F38',
+                borderRadius: 6,
+                barPercentage: 0.65
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { boxWidth: 10, font: { size: 11, weight: '600' } }
+              }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { font: { size: 10, weight: '600' } }
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                grid: { color: '#E2E8F0' },
+                ticks: {
+                  callback: function (v) { return 'Rp' + v + 'rb'; },
+                  font: { size: 10 }
+                }
+              }
+            }
+          }
+        });
+
+        // Chart 2: Student Budget Donut Chart
+        const donutCtx = document.getElementById('studentDonutChart').getContext('2d');
+        const studentDonutChart = new Chart(donutCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Makan Harian (36,5%)', 'Warkop & Kopi (15%)', 'Kos & Listrik (22%)', 'Transport & Data (14,5%)', 'Tabungan/Lain (12%)'],
+            datasets: [{
+              data: [36.5, 15.0, 22.0, 14.5, 12.0],
+              backgroundColor: ['#689F38', '#EF5350', '#0284C7', '#F59E0B', '#94A3B8'],
+              borderWidth: 2,
+              borderColor: '#FFFFFF'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { boxWidth: 10, font: { size: 10, weight: '600' } }
+              }
+            }
+          }
+        });
+
+        // Chart 3: Student Monthly Allowance Horizontal Bar Chart
+        const allowanceCtx = document.getElementById('allowanceBarChart').getContext('2d');
+        new Chart(allowanceCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Klaster Hemat (KIP-K/Kos)', 'Klaster Menengah (Mayoritas)', 'Klaster Mapan (Swasta/Barat)'],
+            datasets: [
+              {
+                label: 'Jatah F&B + Nongkrong (Juta Rp)',
+                data: [0.82, 1.32, 2.35],
+                backgroundColor: '#689F38',
+                borderRadius: 6
+              },
+              {
+                label: 'Sisa Non-F&B (Juta Rp)',
+                data: [0.68, 1.18, 2.15],
+                backgroundColor: '#CBD5E1',
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { boxWidth: 10, font: { size: 10, weight: '600' } }
+              }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                beginAtZero: true,
+                max: 5,
+                grid: { color: '#E2E8F0' },
+                ticks: {
+                  callback: function (v) { return 'Rp' + v + ' Jt'; },
+                  font: { size: 10 }
+                }
+              },
+              y: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { font: { size: 10, weight: '600' } }
+              }
+            }
+          }
+        });
+
+        // Apply active slicer state to KPIs & Charts
+        function applyDashboardFilters() {
+          let profile = dashboardProfiles['all-all'];
+
+          if (activeTier !== 'all' && dashboardProfiles[activeTier]) {
+            profile = dashboardProfiles[activeTier];
+          } else if (activeSeg !== 'all' && dashboardProfiles[`${activeSeg}-all`]) {
+            profile = dashboardProfiles[`${activeSeg}-all`];
+          }
+
+          document.getElementById('kpiBudget').textContent = profile.budget;
+          document.getElementById('kpiBudgetSub').textContent = profile.budgetSub;
+          document.getElementById('kpiFreq').innerHTML = `${profile.freq} <span class="text-sm font-semibold text-slate-500">/minggu</span>`;
+          document.getElementById('kpiFreqSub').textContent = profile.freqSub;
+          document.getElementById('kpiWarkopRatio').textContent = profile.ratio;
+          document.getElementById('kpiWarkopSub').textContent = profile.ratioSub;
+          document.getElementById('cycleInsight').innerHTML = `<strong>Insight Filter Aktif:</strong> ${profile.cycleNote}`;
+
+          // Split cycle total into Meal (68%) & Coffee/Warkop (32%)
+          const mealSeries = profile.cycleData.map((val) => Math.round(val * 0.68));
+          const drinkSeries = profile.cycleData.map((val, idx) => val - mealSeries[idx]);
+
+          cycleBarChart.data.datasets[0].data = mealSeries;
+          cycleBarChart.data.datasets[1].data = drinkSeries;
+          cycleBarChart.update();
+
+          studentDonutChart.data.datasets[0].data = profile.donutData;
+          studentDonutChart.update();
+        }
+
+        // Slicer 1 Listeners
+        const segBtns = document.querySelectorAll('.seg-btn');
+        segBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            activeSeg = btn.getAttribute('data-seg');
+            segBtns.forEach((b) => {
+              if (b === btn) {
+                b.className = 'seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-extrabold bg-[#689F38] text-white shadow-2xs transition-all cursor-pointer';
+              } else {
+                b.className = 'seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer';
+              }
+            });
+            applyDashboardFilters();
+            showToast('Segmen konsumen diperbarui');
+          });
+        });
+
+        // Slicer 2 Listeners
+        const tierBtns = document.querySelectorAll('.tier-filter-btn');
+        tierBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            activeTier = btn.getAttribute('data-tier');
+            tierBtns.forEach((b) => {
+              if (b === btn) {
+                b.className = 'tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-white transition-all cursor-pointer';
+              } else {
+                b.className = 'tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer';
+              }
+            });
+            applyDashboardFilters();
+            showToast('Klaster daya beli diperbarui');
+          });
+        });
+
+        // Reset Button
+        const resetBtn = document.getElementById('resetFilterBtn');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            activeSeg = 'all';
+            activeTier = 'all';
+            segBtns.forEach((b, i) => {
+              b.className = i === 0
+                ? 'seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-extrabold bg-[#689F38] text-white shadow-2xs transition-all cursor-pointer'
+                : 'seg-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer';
+            });
+            tierBtns.forEach((b, i) => {
+              b.className = i === 0
+                ? 'tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-white transition-all cursor-pointer'
+                : 'tier-filter-btn text-left px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer';
+            });
+            applyDashboardFilters();
+            showToast('Semua filter direset ke data keseluruhan');
+          });
+        }
+
+        // PDF Print Button
+        const printBtn = document.getElementById('printDashBtn');
+        if (printBtn) {
+          printBtn.addEventListener('click', () => {
+            showToast('Membuka dialog Simpan PDF...');
+            setTimeout(() => window.print(), 250);
+          });
+        }
+
+        // NEW: Chart 4 - Perbandingan Populasi Warga Tetap vs Mahasiswa Aktif per Klaster Surabaya
+        const regionPopCanvas = document.getElementById('regionPopChart');
+        if (regionPopCanvas) {
+          new Chart(regionPopCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: ['SBY Timur', 'SBY Pusat', 'SBY Utara', 'SBY Barat', 'SBY Selatan'],
+              datasets: [
+                {
+                  label: 'Warga Tetap (Ribu Jiwa)',
+                  data: [315, 285, 290, 225, 165],
+                  backgroundColor: '#0284C7',
+                  borderRadius: 6
+                },
+                {
+                  label: 'Mahasiswa Aktif (Ribu Jiwa)',
+                  data: [170, 20, 9.4, 38, 98],
+                  backgroundColor: '#689F38',
+                  borderRadius: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: { boxWidth: 10, font: { size: 10, weight: '600' } }
+                }
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: { font: { size: 10, weight: '700' } }
+                },
+                y: {
+                  beginAtZero: true,
+                  grid: { color: '#E2E8F0' },
+                  ticks: {
+                    callback: function (v) { return v + ' rb'; },
+                    font: { size: 10 }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // NEW: Interactive Map Pin Inspector for Strategic Regions
+        const regionDetails = {
+          timur: {
+            badge: 'Klaster #1 • Kepadatan Mahasiswa & Keluarga Muda',
+            title: 'Surabaya Timur (Mulyorejo, Sukolilo, Rungkut, Gubeng)',
+            fit: 'Cocok: Mahasiswa & Keluarga',
+            income: 'Rp9–16 Jt/bln',
+            ratio: '315rb vs 170rb',
+            pct: '35,1% Populasi',
+            advice: 'Strategi Titik: Koridor MERR, Dharmahusada & Rungkut Madya menangkap 2 pasar sekaligus: mahasiswa UNAIR/ITS/UPN/UBAYA siang-malam dan keluarga muda residensial.'
+          },
+          selatan: {
+            badge: 'Klaster #2 • Koridor Kampus & Perkantoran Komuter',
+            title: 'Surabaya Selatan (Ketintang, Gayungan, Wonocolo, A. Yani)',
+            fit: 'Cocok: Mahasiswa & Pekerja',
+            income: 'Rp8,5–15 Jt/bln',
+            ratio: '165rb vs 98rb',
+            pct: '37,3% Populasi',
+            advice: 'Strategi Titik: Dekat UNESA Ketintang, UINSA & UK Petra (Siwalankerto) sangat kuat untuk konsep cepat saji siang hari, katering kantor, dan warkop modern malam.'
+          },
+          barat: {
+            badge: 'Klaster #3 • Daya Beli Keluarga Tertinggi di Surabaya',
+            title: 'Surabaya Barat (Citraland, Dukuh Pakis, Wiyung, HR Muhammad)',
+            fit: 'Cocok: Keluarga Mapan',
+            income: 'Rp14–28 Jt+/bln',
+            ratio: '225rb vs 38rb',
+            pct: '14,4% Populasi',
+            advice: 'Strategi Titik: Konsumen keluarga sangat mengutamakan kenyamanan ruangan ber-AC, kebersihan toilet, dan area parkir mobil yang luas dengan AOV Rp45rb–Rp85rb+.'
+          },
+          pusat: {
+            badge: 'Klaster #4 • Pusat Bisnis & Wisata Kuliner Malam',
+            title: 'Surabaya Pusat (Tunjungan, Darmo, Tegalsari, Genteng)',
+            fit: 'Cocok: Keluarga & Wisatawan',
+            income: 'Rp10–18 Jt/bln',
+            ratio: '285rb vs 20rb',
+            pct: '6,6% Populasi',
+            advice: 'Strategi Titik: Trafik pejalan kaki dan pekerja kantor sangat padat dari makan siang hingga wisata kuliner malam di koridor Tunjungan & Embong Malang.'
+          },
+          utara: {
+            badge: 'Klaster #5 • Zona Perdagangan & Pelabuhan',
+            title: 'Surabaya Utara (Perak, Kenjeran, Kapasan, Pabean)',
+            fit: 'Cocok: Warga Lokal & Grosir',
+            income: 'Rp6,5–10,5 Jt/bln',
+            ratio: '290rb vs 9,4rb',
+            pct: '3,1% Populasi',
+            advice: 'Strategi Titik: Pasar didominasi keluarga lokal dan pekerja logistik/pelabuhan yang mengutamakan porsi ekstra kenyang dan harga ekonomis.'
+          }
+        };
+
+        const regionPins = document.querySelectorAll('.region-pin');
+        regionPins.forEach((pin) => {
+          pin.addEventListener('click', () => {
+            const key = pin.getAttribute('data-region');
+            const info = regionDetails[key];
+            if (!info) return;
+            document.getElementById('regBadge').textContent = info.badge;
+            document.getElementById('regTitle').textContent = info.title;
+            document.getElementById('regFit').textContent = info.fit;
+            document.getElementById('regIncome').textContent = info.income;
+            document.getElementById('regPopRatio').textContent = info.ratio;
+            document.getElementById('regMhsPct').textContent = info.pct;
+            document.getElementById('regAdvice').innerHTML = `<strong>${info.advice.split(':')[0]}:</strong>${info.advice.split(':').slice(1).join(':')}`;
+            showToast(`Menampilkan data ${info.title.split('(')[0].trim()}`);
+          });
+        });
+
+        // NEW: Target Location Switcher (Mahasiswa vs Keluarga)
+        const locTargetBtns = document.querySelectorAll('.loc-target-btn');
+        const cardMhs = document.getElementById('cardTargetMahasiswa');
+        const cardKel = document.getElementById('cardTargetKeluarga');
+        locTargetBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-loctarget');
+            locTargetBtns.forEach((b) => {
+              const t = b.getAttribute('data-loctarget');
+              if (b === btn) {
+                b.className = 'loc-target-btn px-3.5 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-white shadow-xs transition-all cursor-pointer';
+              } else if (t === 'mahasiswa') {
+                b.className = 'loc-target-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-lime-100 text-lime-900 hover:bg-lime-200 transition-all cursor-pointer';
+              } else if (t === 'keluarga') {
+                b.className = 'loc-target-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-100 text-amber-900 hover:bg-amber-200 transition-all cursor-pointer';
+              } else {
+                b.className = 'loc-target-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer';
+              }
+            });
+
+            if (cardMhs && cardKel) {
+              if (target === 'mahasiswa') {
+                cardMhs.classList.remove('opacity-45', 'scale-[0.99]');
+                cardKel.classList.add('opacity-45', 'scale-[0.99]');
+              } else if (target === 'keluarga') {
+                cardKel.classList.remove('opacity-45', 'scale-[0.99]');
+                cardMhs.classList.add('opacity-45', 'scale-[0.99]');
+              } else {
+                cardMhs.classList.remove('opacity-45', 'scale-[0.99]');
+                cardKel.classList.remove('opacity-45', 'scale-[0.99]');
+              }
+            }
+          });
+        });
+      } catch (err) {
+        console.error('Dashboard error:', err);
+      }
+    })();
+  </script>
+</body>
+</html>
